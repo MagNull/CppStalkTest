@@ -12,6 +12,25 @@ enum UserSortType
     ById = 3,
 };
 
+static void PrintUsersByOrder(std::vector<User*>& users, UserSortType sort_type)
+{
+    for (auto user : users)
+    {
+        switch (sort_type)
+        {
+        case UserSortType::ByName:
+            std::wcout << user->GetName() << L' ' << user->GetSurname() << L": " << user->GetID() << '\n';
+            break;
+        case UserSortType::BySurname:
+            std::wcout << user->GetSurname() << L' ' << user->GetName() << L": " << user->GetID() << '\n';
+            break;
+        case UserSortType::ById:
+            std::wcout << user->GetID() << L": " << user->GetSurname() << L' ' << user->GetName() << '\n';
+            break;
+        }
+    }
+}
+
 static void Start(std::vector<User*>& users)
 {
     UserSorter sorter(users);
@@ -20,17 +39,17 @@ static void Start(std::vector<User*>& users)
     std::cout << "Для сортировки по именам введите – " << UserSortType::ByName
         << ", по фамилиям введите - " << UserSortType::BySurname
         << ", по телефонам введите - " << UserSortType::ById << '\n';
-    
+
     std::string input;
     std::wcout << L"> ";
+    int sort_type;
 
     //Sorting and printing loop
     while (std::getline(std::cin, input))
     {
         try
         {
-            const auto sort_type = std::stoi(input);
-
+            sort_type = std::stoi(input);
             switch (sort_type)
             {
             case UserSortType::ByName:
@@ -53,10 +72,8 @@ static void Start(std::vector<User*>& users)
             continue;
         }
 
-        for (auto user : sorter.GetUsers())
-        {
-            std::wcout << user->GetName() << L" " << user->GetSurname() << L": " << user->GetID() << L'\n';
-        }
+        auto users = sorter.GetUsers();
+        PrintUsersByOrder(users, (UserSortType)sort_type);
         std::wcout << L"> ";
     }
 }
@@ -65,7 +82,7 @@ int main(int argc, char* argv[])
 {
     std::locale::global(std::locale("ru_RU.UTF-8"));
     SetConsoleOutputCP(CP_UTF8);
-    
+
     try
     {
         if (argc < 2)
@@ -78,7 +95,7 @@ int main(int argc, char* argv[])
         UsersFileReader reader(filename);
         std::vector<User*> users;
         reader.GetUsers(users);
-        
+
         if (users.empty())
         {
             throw std::runtime_error("Input file is empty or has an incorrect data format!");
